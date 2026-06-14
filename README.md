@@ -59,6 +59,10 @@ LONG_CLICK_FUZZ=100
 # listen on. This overrides the blacklist - when whitelist is present,
 # any device not in this list will be ignored.
 #TOUCH_DEVICE_WHITELIST="device1 name|device2 name|..."
+# This is the change.  Set TOUCH_DELAY_CLICK=1 to activate the new
+# behavior.  The context menu will only open once you long press and
+# release your finger when this is set.
+#TOUCH_DELAY_CLICK=1
 ```
 
 So you can run the program like
