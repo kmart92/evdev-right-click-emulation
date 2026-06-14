@@ -13,6 +13,7 @@ struct input_state_t {
     int pos_x, pos_y;
     int pressed_pos_x, pressed_pos_y;
     int fd_timer; // The timer used to execute right click on timeout
+    int right_click_held; // tracks if right click being held for TABLET_DELAY_CLICK
     struct libevdev_uinput *uinput;
 };
 
@@ -85,6 +86,11 @@ void on_input_event(struct input_state_t *state,
             arm_delayed_rclick(state, dev_id);
         } else {
             // Finger released. It is no longer considered a long-press
+            // if TOUCH_DELAY_CLICK and state->right_click_held then send right click
+            if (TOUCH_DELAY_CLICK && state->right_click_held) {
+                uinput_send_right_click(state->uinput);
+                state->right_click_held = 0;
+            }
             unarm_delayed_rclick(state);
         }
     }
@@ -96,8 +102,13 @@ void on_timer_expire(struct input_state_t *state) {
     // Only consider movement within a range to be "still"
     // i.e. if movement is within this value during timeout
     //      , then it is a long click
-    if (dx <= LONG_CLICK_FUZZ && dy <= LONG_CLICK_FUZZ)
-        uinput_send_right_click(state->uinput);
+    if (dx <= LONG_CLICK_FUZZ && dy <= LONG_CLICK_FUZZ) {
+	// if TOUCH_DELAY_CLICK is zero then send right click
+        // also save right click as being held
+        state->right_click_held = 1;
+        if (!TOUCH_DELAY_CLICK)
+            uinput_send_right_click(state->uinput);
+    }
     // In Linux implementation of timerfd, the fd becomes always "readable"
     // after the timeout. So we have to unarm it after we receive the event.
     unarm_delayed_rclick(state);

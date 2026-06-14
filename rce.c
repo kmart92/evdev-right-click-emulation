@@ -30,6 +30,10 @@ char *TOUCH_DEVICE_BLACKLIST = NULL;
 // we should ONLY listen on
 char *TOUCH_DEVICE_WHITELIST = NULL;
 
+// Delay the right click even until release
+// to avoid menu closing right away
+int TOUCH_DELAY_CLICK = 0;
+
 // Determine if a device name is contained
 // in a "|"-separated device list
 int list_contains(const char *list, const char* name) {
@@ -145,6 +149,10 @@ int main() {
         printf("Note: Whitelist mode is enabled. This overrides the blacklist.\n");
         TOUCH_DEVICE_WHITELIST = malloc(strlen(env) + 3);
         sprintf(TOUCH_DEVICE_WHITELIST, "|%s|", env);
+    }
+
+    if ((env = getenv("TOUCH_DELAY_CLICK")) != NULL) {
+        TOUCH_DELAY_CLICK = atoi(env);
     }
 
     struct libevdev *devices[MAX_TOUCHSCREEN_NUM];
